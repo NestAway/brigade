@@ -20,6 +20,8 @@ spec:
         role: gateway
         type: github
     spec:
+      nodeSelector:
+        b-type: brigade-node-group
       serviceAccountName: {{ $fullname }}
       containers:
       - name: {{ .Chart.Name }}

@@ -1,7 +1,7 @@
 # The Docker registry where images are pushed.
 # Note that if you use an org (like on Quay and DockerHub), you should
 # include that: quay.io/foo
-DOCKER_REGISTRY    ?= deis
+DOCKER_REGISTRY    ?= nestaway
 DOCKER_BUILD_FLAGS :=
 LDFLAGS            :=
 

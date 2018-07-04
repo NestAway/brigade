@@ -17,6 +17,8 @@ spec:
         app: {{ $fullname }}
         role: controller
     spec:
+      nodeSelector:
+        b-type: brigade-node-group
       serviceAccountName: {{ $fullname }}
       containers:
       - name: {{ .Chart.Name }}

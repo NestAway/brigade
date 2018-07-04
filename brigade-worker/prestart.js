@@ -7,14 +7,14 @@ const scripts = [
   // manual override for debugging
   process.env.BRIGADE_SCRIPT,
 
-  // data mounted from event secret (e.g. brig run)
-  "/etc/brigade/script",
+  // mounted configmap named in brigade.sh/project.DefaultScriptName
+  "/etc/brigade-default-script/brigade.js",
 
   // checked out in repo
   "/vcs/brigade.js",
 
-  // mounted configmap named in brigade.sh/project.DefaultScriptName
-  "/etc/brigade-default-script",
+  // data mounted from event secret (e.g. brig run)
+  "/etc/brigade/script",
 ];
 
 //checked out in repo

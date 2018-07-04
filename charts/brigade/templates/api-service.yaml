@@ -8,6 +8,8 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
     role: api
+  annotations:
+    dns.alpha.kubernetes.io/external: brigade-api.{{ .Values.k8sEnvUrl }}
 spec:
   type: {{ .Values.api.service.type }}
   ports:

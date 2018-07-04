@@ -94,6 +94,7 @@ func (c *Controller) newWorkerPod(build, project *v1.Secret) v1.Pod {
 		ServiceAccountName: c.Config.WorkerServiceAccount,
 		NodeSelector: map[string]string{
 			"beta.kubernetes.io/os": "linux",
+			"b-type": "brigade-node-group",
 		},
 		Containers: []v1.Container{{
 			Name:            "brigade-runner",

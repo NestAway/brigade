@@ -9,6 +9,8 @@ metadata:
     heritage: "{{ .Release.Service }}"
     role: gateway
     type: dockerhub
+  annotations:
+    dns.alpha.kubernetes.io/external: brigade-cr.{{ .Values.k8sEnvUrl }}
 spec:
   type: {{ .Values.cr.service.type }}
   ports:

@@ -17,6 +17,8 @@ spec:
         app: {{ template "brigade.fullname" . }}-api
         role: api
     spec:
+      nodeSelector:
+        b-type: brigade-node-group
       serviceAccountName: {{ template "brigade.api.fullname" . }}
       containers:
       - name: {{ .Chart.Name }}

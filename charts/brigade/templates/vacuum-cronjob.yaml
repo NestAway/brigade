@@ -21,6 +21,8 @@ spec:
             app: {{ template "brigade.fullname" . }}
             role: vacuum
         spec:
+          nodeSelector:
+            b-type: brigade-node-group
           serviceAccountName: {{ $fullname }}
           containers:
           - name: {{ .Chart.Name }}-vacuum

@@ -34,11 +34,11 @@
 # to the rules created here. We recommend that you understand RBACs
 # before enabling this.
 rbac:
-  enabled: false
+  enabled: true
 
 # controller is the main event processor in Brigade.
 controller:
-  registry: deis
+  registry: nestaway
   name: brigade-controller
   # tag should only be specified if you want to override Chart.appVersion
   # The default tag is the value of .Chart.AppVersion
@@ -53,13 +53,13 @@ controller:
 # brig) may not be able to learn about it.
 api:
   enabled: true
-  registry: deis
+  registry: nestaway
   name: brigade-api
   # tag:
   service:
     name: brigade-api
-    type: ClusterIP
-    externalPort: 7745
+    type: NodePort
+    externalPort: 80
     internalPort: 7745
   # Configure liveness probes except `httpGet` and the belongings
   #livenessProbe:
@@ -75,7 +75,7 @@ api:
 
 # worker is the JavaScript worker. These are created on demand by the controller.
 worker:
-  registry: deis
+  registry: nestaway
   name: brigade-worker
   serviceAccount: brigade-worker
   #tag:
@@ -84,7 +84,7 @@ worker:
 # gw is the GitHub gateway.
 gw:
   enabled: true
-  registry: deis
+  registry: nestaway
   name: brigade-github-gateway
   #tag:
   #pullPolicy: IfNotPresent
@@ -111,7 +111,7 @@ gw:
 # attacks on your cluster.
 cr:
   enabled: false
-  registry: deis
+  registry: nestaway
   name: brigade-cr-gateway
   #tag: latest
   service:
@@ -133,28 +133,28 @@ vacuum:
   # Note that a run of the vacuum typically takes at least a minute. Finer-level
   # granularity than that may result in multiple vacuums running at once.
   # Format follows accepted Cron formats: https://en.wikipedia.org/wiki/Cron
-  schedule: "@hourly"
-  registry: "deis"
+  schedule: "*/15 * * * *"
+  registry: "nestaway"
   name: "brigade-vacuum"
   # tag: latest
   # Age tells the vacuum how old a thing may be before it is considered ready to
   # be vacuumed. The format is an integer followed by the suffix h (hours), m (minutes)
   # or s (seconds).
   # The default is 30 days (720 hours)
-  age: "720h"
+  age: "24h"
   # maxBuilds tells the vacuum what the absolute maximum number of builds may be stored
   # at a time. Where possible, we recommend using age rather than builds.
   # 0 means no limit is imposed.
   #
   # If both age and maxBuilds are provided, age is applied first, then maxBuilds.
-  maxBuilds: 0
+  maxBuilds: 5
 
 # The service is for the Brigade gateway. If you do not want to have Brigade
 # listening for incomming GitHub requests, disable this.
 service:
   name: brigade-service
-  type: LoadBalancer
-  externalPort: 7744
+  type: NodePort
+  externalPort: 80
   internalPort: 7744
 # By default, this is off. If you enable it, you might want to change the
 # service.type to ClusterIP
