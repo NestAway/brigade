@@ -1,12 +1,15 @@
 package webhook
 
 import (
+	"os"
 	"crypto/subtle"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"encoding/json"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -43,7 +46,7 @@ func (s *githubHook) Handle(c *gin.Context) {
 	switch event {
 	case "ping":
 		log.Print("Received ping from GitHub")
-		c.JSON(200, gin.H{"message": "OK"})
+		s.registerProject(c)
 		return
 	case "push", "pull_request", "create", "release", "status", "commit_comment", "pull_request_review", "deployment", "deployment_status":
 		s.handleEvent(c, event)
@@ -54,6 +57,55 @@ func (s *githubHook) Handle(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Ignored"})
 		return
 	}
+}
+
+// Auto registers a project on webhook ping.
+func (s *githubHook) registerProject(c *gin.Context) {
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Printf("Failed to read body: %s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"status": "Malformed body"})
+		return
+	}
+	defer c.Request.Body.Close()
+	pingPayload := github.PushEvent{}
+	err = json.Unmarshal(body, pingPayload)
+	if err != nil {
+		log.Printf("Failed to parse body: %s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"status": "Malformed body"})
+		return
+	}
+
+	p := &brigade.Project{
+		Name: pingPayload.Repo.GetFullName(),
+		AllowHostMounts: true,
+		AllowPrivilegedJobs: true,
+		Repo: brigade.Repo{
+			Name: strings.TrimPrefix(pingPayload.Repo.GetSVNURL(), "https://"),
+			CloneURL: pingPayload.Repo.GetCloneURL(),
+		},
+		DefaultScript: os.Getenv("BRIGADE_DEFAULT_SCRIPT"),
+		Github: brigade.Github{
+			Token: os.Getenv("GITHUB_ACCESS_TOKEN"),
+		},
+		InitGitSubmodules: false,
+		Secrets: brigade.SecretsMap{
+			"aws_account_id": os.Getenv("AWS_ACCOUNT_ID"),
+			"aws_region"    : os.Getenv("AWS_REGION"),
+			"branch"	    : os.Getenv("K8S_ENV"),
+			"environment"   : os.Getenv("K8S_ENV"),
+			"service_name"  : strings.ToLower(pingPayload.Repo.GetName()),
+		},
+		SharedSecret: os.Getenv("GIT_SHARED_SECRET"),
+		Kubernetes: brigade.Kubernetes{
+			VCSSidecar: os.Getenv("VCS_SIDECAR_IMAGE"),
+		},
+	}
+
+	if err := s.store.CreateProject(p); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "Project creation failed"})
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "Project creation successful for the ping event"})
 }
 
 func (s *githubHook) handleEvent(c *gin.Context, eventType string) {
