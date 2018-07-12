@@ -50,28 +50,28 @@ spec:
           - name: GITHUB_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name:
-                key:
+                name: brigade-nestaway-secret
+                key: github_access_token
           - name: AWS_ACCOUNT_ID
             valueFrom:
               secretKeyRef:
-                name:
-                key:
+                name: brigade-nestaway-secret
+                key: aws_account_id
           - name: AWS_REGION
             valueFrom:
               secretKeyRef:
-                name:
-                key:
+                name: brigade-nestaway-secret
+                key: aws_region
           - name: K8S_ENV
             valueFrom:
               secretKeyRef:
-                name:
-                key:
+                name: brigade-nestaway-secret
+                key: k8s_env
           - name: GIT_SHARED_SECRET
             valueFrom:
               secretKeyRef:
-                name:
-                key:
+                name: brigade-nestaway-secret
+                key: shared_secret
           - name: VCS_SIDECAR_IMAGE
             value: nestaway/git-sidecar:{{ .Chart.AppVersion }}
           - name: BRIGADE_GATEWAY_PORT
