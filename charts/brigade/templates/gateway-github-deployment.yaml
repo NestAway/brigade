@@ -42,6 +42,38 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: BRIGADE_DEFAULT_SCRIPT
+            valueFrom:
+              secretKeyRef:
+                name: brigade-nestaway-secret
+                key: brigade-script
+          - name: GITHUB_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name:
+                key:
+          - name: AWS_ACCOUNT_ID
+            valueFrom:
+              secretKeyRef:
+                name:
+                key:
+          - name: AWS_REGION
+            valueFrom:
+              secretKeyRef:
+                name:
+                key:
+          - name: K8S_ENV
+            valueFrom:
+              secretKeyRef:
+                name:
+                key:
+          - name: GIT_SHARED_SECRET
+            valueFrom:
+              secretKeyRef:
+                name:
+                key:
+          - name: VCS_SIDECAR_IMAGE
+            value: nestaway/git-sidecar:{{ .Chart.AppVersion }}
           - name: BRIGADE_GATEWAY_PORT
             value: {{ .Values.service.internalPort | quote }}
           - name: BRIGADE_AUTHORS
