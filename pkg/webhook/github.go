@@ -68,8 +68,8 @@ func (s *githubHook) registerProject(c *gin.Context) {
 		return
 	}
 	defer c.Request.Body.Close()
-	pingPayload := github.PushEvent{}
-	err = json.Unmarshal(body, pingPayload)
+	pingPayload := &github.PushEvent{}
+	err = json.Unmarshal(body, &pingPayload)
 	if err != nil {
 		log.Printf("Failed to parse body: %s", err)
 		c.JSON(http.StatusBadRequest, gin.H{"status": "Malformed body"})
