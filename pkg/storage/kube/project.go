@@ -122,6 +122,21 @@ func (s *store) CreateProject(project *brigade.Project) error {
 	return err
 }
 
+// UpdateProject updates a given project.
+//
+// Project Name is a required field. If not present, Project ID will be calculated
+// from project name. This is preferred.
+//
+// Note that project secrets are not redacted.
+func (s *store) UpdateProject(project *brigade.Project) error {
+	secret, err := SecretFromProject(project)
+	if err != nil {
+		return err
+	}
+	_, err = s.client.CoreV1().Secrets(s.namespace).Update(&secret)
+	return err
+}
+
 // DeleteProject deletes a project from storage.
 func (s *store) DeleteProject(id string) error {
 	return s.client.CoreV1().Secrets(s.namespace).Delete(id, &meta.DeleteOptions{})

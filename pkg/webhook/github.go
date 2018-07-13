@@ -102,8 +102,9 @@ func (s *githubHook) registerProject(c *gin.Context) {
 		},
 	}
 
-	if err := s.store.CreateProject(p); err != nil {
+	if err := s.store.UpdateProject(p); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "Project creation failed"})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "Project creation successful for the ping event"})
 }

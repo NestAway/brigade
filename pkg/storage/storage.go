@@ -18,6 +18,8 @@ type ProjectStore interface {
 	GetProjectBuilds(proj *brigade.Project) ([]*brigade.Build, error)
 	// CreateProject creates a new project record in storage.
 	CreateProject(proj *brigade.Project) error
+	// UpdateProject updates an existing project record in storage.
+	UpdateProject(proj *brigade.Project) error
 	// DeleteProject deletes a project from storage.
 	DeleteProject(id string) error
 }
