@@ -102,11 +102,13 @@ func (s *githubHook) registerProject(c *gin.Context) {
 		},
 	}
 
-	if err := s.store.UpdateProject(p); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "Project creation failed"})
-		return
+	if u_err := s.store.UpdateProject(p); u_err != nil {
+		if c_err := s.store.CreateProject(p); c_err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "Project creation / updation failed"})
+			return
+		}
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "Project creation successful for the ping event"})
+	c.JSON(http.StatusOK, gin.H{"status": "Project creation / updation successful for the ping event"})
 }
 
 func (s *githubHook) handleEvent(c *gin.Context, eventType string) {
