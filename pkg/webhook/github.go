@@ -101,6 +101,9 @@ func (s *githubHook) registerProject(c *gin.Context) {
 			VCSSidecar: os.Getenv("VCS_SIDECAR_IMAGE"),
 		},
 	}
+	if os.Getenv("K8S_ENV") == "production" {
+		p.Secrets["branch"] = "master"
+	}
 
 	if u_err := s.store.UpdateProject(p); u_err != nil {
 		if c_err := s.store.CreateProject(p); c_err != nil {
