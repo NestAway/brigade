@@ -100,6 +100,7 @@ func (s *githubHook) registerProject(c *gin.Context) {
 		Kubernetes: brigade.Kubernetes{
 			VCSSidecar: os.Getenv("VCS_SIDECAR_IMAGE"),
 		},
+		ImagePullSecrets: "gc-secret",
 	}
 	if os.Getenv("K8S_ENV") == "production" {
 		p.Secrets["branch"] = "master"

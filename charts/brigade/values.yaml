@@ -75,7 +75,7 @@ api:
 
 # worker is the JavaScript worker. These are created on demand by the controller.
 worker:
-  registry: nestaway
+  registry: asia.gcr.io/nestaway-development
   name: brigade-worker
   serviceAccount: 
     create: true
