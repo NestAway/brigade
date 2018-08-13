@@ -107,11 +107,12 @@ function releaseBrig(e, p, tag) {
 
   // Upload for each target that we support
   for (const f of ["linux-amd64", "windows-amd64", "darwin-amd64"]) {
-    var name = binName + "-"+f
+    var name = binName + "-" + f;
+    var outname = name;
     if (f == "windows-amd64") {
-      name += ".exe"
+      outname += ".exe"
     }
-    cx.tasks.push(`github-release upload -f ./bin/${name} -n ${name} -t ${tag}`)  
+    cx.tasks.push(`github-release upload -f ./bin/${name} -n ${outname} -t ${tag}`)  
   }
   console.log(cx.tasks);
   console.log(`releases at https://github.com/${p.repo.name}/releases/tag/${tag}`);
@@ -126,7 +127,8 @@ function ghNotify(state, msg, e, project) {
     GH_DESCRIPTION: msg,
     GH_CONTEXT: "brigade",
     GH_TOKEN: project.secrets.ghToken,
-    GH_COMMIT: e.revision.commit
+    GH_COMMIT: e.revision.commit,
+    GH_TARGET_URL: `https://azure.github.io/kashti/builds/${ e.buildID }`,
   }
   return gh
 }
