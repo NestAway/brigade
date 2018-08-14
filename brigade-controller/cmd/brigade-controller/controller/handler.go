@@ -235,6 +235,14 @@ func (c *Controller) workerEnv(project, build *v1.Secret) []v1.EnvVar {
 			Name:      "BRIGADE_REPO_AUTH_TOKEN",
 			ValueFrom: secretRef("github.token", project),
 		},
+		{
+			Name: "NODE_NAME",
+			ValueFrom: &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					FieldPath: "spec.nodeName",
+				},
+			},
+		},
 		{Name: "BRIGADE_SERVICE_ACCOUNT", Value: c.Config.WorkerServiceAccount},
 	}
 	return env
