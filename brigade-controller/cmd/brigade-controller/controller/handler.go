@@ -243,6 +243,22 @@ func (c *Controller) workerEnv(project, build *v1.Secret) []v1.EnvVar {
 				},
 			},
 		},
+		{
+			Name:      "AWS_ACCOUNT_ID",
+			ValueFrom: secretRefFromName("aws_account_id", "brigade-nestaway-secret"),
+		},
+		{
+			Name:      "AWS_REGION",
+			ValueFrom: secretRefFromName("aws_region", "brigade-nestaway-secret"),
+		},
+		{
+			Name:      "AWS_ACCESS_KEY_ID",
+			ValueFrom: secretRefFromName("aws-access-key-id", "brigade-aws-secret"),
+		},
+		{
+			Name:      "AWS_SECRET_ACCESS_KEY",
+			ValueFrom: secretRefFromName("aws-secret-access-key", "brigade-aws-secret"),
+		},
 		{Name: "BRIGADE_SERVICE_ACCOUNT", Value: c.Config.WorkerServiceAccount},
 	}
 	return env
@@ -257,6 +273,19 @@ func secretRef(key string, secret *v1.Secret) *v1.EnvVarSource {
 			Key: key,
 			LocalObjectReference: v1.LocalObjectReference{
 				Name: secret.Name,
+			},
+			Optional: &trueVal,
+		},
+	}
+}
+
+func secretRefFromName(key, secret string) *v1.EnvVarSource {
+	trueVal := true
+	return &v1.EnvVarSource{
+		SecretKeyRef: &v1.SecretKeySelector{
+			Key: key,
+			LocalObjectReference: v1.LocalObjectReference{
+				Name: secret,
 			},
 			Optional: &trueVal,
 		},
