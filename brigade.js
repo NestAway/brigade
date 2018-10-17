@@ -4,7 +4,7 @@
 // ============================================================================
 const { events, Job, Group} = require("brigadier")
 
-const goImg = "golang:1.10"
+const goImg = "golang:1.11"
 
 function build(e, project) {
   // This is a Go project, so we want to set it up for Go.
@@ -26,12 +26,12 @@ function build(e, project) {
 
   // Run Go unit tests
   goBuild.tasks = [
-    "go get github.com/golang/dep/cmd/dep",
     // Need to move the source into GOPATH so vendor/ works as desired.
     "mkdir -p " + localPath,
     "mv /src/* " + localPath,
     "cd " + localPath,
-    "dep ensure",
+    "make vendor",
+    "make test-style",
     "make test-unit"
   ];
 
@@ -51,12 +51,11 @@ function build(e, project) {
   .then(() => {
       return ghNotify("success", `Build ${ e.buildID } passed`, e, project).run()
    }).then( () => {
-    const gh = JSON.parse(e.payload)
     var runRelease = false
-    if (e.event == "push" && gh.ref.startsWith("refs/tags/")) {
+    if (e.type == "push" && e.revision.ref.startsWith("refs/tags/")) {
       // Run the release in the background.
       runRelease = true
-      let parts = gh.ref.split("/", 3)
+      let parts = e.revision.ref.split("/", 3)
       let tag = parts[2]
       return acrBuild(e, project, tag).then(() => {
         releaseBrig(e, project, tag)
@@ -91,7 +90,6 @@ function releaseBrig(e, p, tag) {
   }
 
   cx.tasks = [
-    "go get github.com/golang/dep/cmd/dep",
     "go get github.com/aktau/github-release",
     `cd /src`,
     `git checkout ${tag}`,
@@ -100,18 +98,15 @@ function releaseBrig(e, p, tag) {
     `cp -a /src/* ${localPath}`,
     `cp -a /src/.git ${localPath}`,
     `cd ${localPath}`,
-    "dep ensure",
+    "make vendor",
     "make build-release",
     `github-release release -t ${tag} -n "${parts[1]} ${tag}" || echo "release ${tag} exists"`
   ];
 
   // Upload for each target that we support
-  for (const f of ["linux-amd64", "windows-amd64", "darwin-amd64"]) {
+  for (const f of ["linux-amd64", "windows-amd64.exe", "darwin-amd64"]) {
     var name = binName + "-" + f;
     var outname = name;
-    if (f == "windows-amd64") {
-      outname += ".exe"
-    }
     cx.tasks.push(`github-release upload -f ./bin/${name} -n ${outname} -t ${tag}`)  
   }
   console.log(cx.tasks);
@@ -156,11 +151,10 @@ function acrBuild(e, project, tag) {
   };
   goBuild.tasks = [
     `cd /src && git checkout ${tag}`,
-    "go get github.com/golang/dep/cmd/dep",
     `mkdir -p ${localPath}/bin`,
     `mv /src/* ${localPath}`,
     `cd ${localPath}`,
-    "dep ensure",
+    "make vendor",
     "make build-docker-bins"
   ];
 
@@ -193,7 +187,7 @@ function acrBuild(e, project, tag) {
     builder.tasks.push(
       `cd ${i}`,
       `echo '========> Building ${i}'`,
-      `cp -av /mnt/brigade/share/${i}/rootfs ./rootfs`,
+      `cp -av /mnt/brigade/share/${i}/rootfs ./`,
       `az acr build -r ${registry} -t ${imgName} -t ${latest} .`,
       `echo '<======== Finished ${i}'`,
       `cd ..`

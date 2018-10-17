@@ -20,6 +20,10 @@ cloneURL: "https://github.com/deis/empty-testbed.git"
 #   }
 #   events.on("run", run)
 
+# OPTIONAL: defaultScriptName is the name of a configmap used as a fallback brigade.js.
+# defaultScriptName: default-script-cm
+
+
 # Used by GitHub and other services to compute hook HMACs.
 sharedSecret: "IBrakeForSeaBeasts"
 
@@ -77,7 +81,7 @@ secrets:
 # If this is set to NONE, no sidecar is used.  This may improve performance
 # very slightly, but will break some gateways or cause the default script to
 # be used.
-vcsSidecar: "deis/git-sidecar:latest"
+# vcsSidecar: "deis/git-sidecar:latest"
 
 # OPTIONAL: imagePullSecrets allows you to specify a comma-separated list of
 # image pull secrets that will be injected into the worker. With this, you can

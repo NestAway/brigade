@@ -13,17 +13,17 @@ import (
 
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
-
 	"github.com/go-openapi/spec"
 
 	"k8s.io/api/core/v1"
 )
 
 var (
+	apiPort    string
 	kubeconfig string
 	master     string
 	namespace  string
-	apiPort    string
+	verbose    bool
 )
 
 func init() {
@@ -31,6 +31,7 @@ func init() {
 	flag.StringVar(&master, "master", "", "master url")
 	flag.StringVar(&namespace, "namespace", defaultNamespace(), "kubernetes namespace")
 	flag.StringVar(&apiPort, "api-port", defaultAPIPort(), "TCP port to use for brigade-api")
+	flag.BoolVar(&verbose, "verbose", false, "enables detailed logging of http request matching and filter invocation")
 }
 
 type jobService struct {
@@ -182,6 +183,9 @@ func (hs healthService) WebService() *restful.WebService {
 
 func main() {
 	flag.Parse()
+
+	restful.EnableTracing(verbose)
+
 	clientset, err := kube.GetClient(master, kubeconfig)
 	if err != nil {
 		log.Fatalf("error creating kubernetes client (%s)", err)
@@ -203,8 +207,8 @@ func main() {
 	restful.DefaultContainer.Filter(NCSACommonLogFormatLogger())
 
 	config := restfulspec.Config{
-		WebServices: restful.RegisteredWebServices(),
-		APIPath:     "/apidocs.json",
+		WebServices:                   restful.RegisteredWebServices(),
+		APIPath:                       "/apidocs.json",
 		PostBuildSwaggerObjectHandler: enrichSwaggerObject}
 	restful.DefaultContainer.Add(restfulspec.NewOpenAPIService(config))
 
